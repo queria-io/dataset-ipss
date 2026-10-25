@@ -1,0 +1,24 @@
+name: Probe
+on: push
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -sSfL -o kekka.xlsx https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/3kekka/suikei_kekka.xlsx
+          ls -l kekka.xlsx
+          pip install openpyxl >/dev/null
+          python - <<'PY'
+          import openpyxl
+          b = openpyxl.load_workbook("kekka.xlsx", read_only=True)
+          for s in b.worksheets:
+              rows = list(s.iter_rows(values_only=True))
+              print("SHEET", s.title, len(rows))
+              for r in rows[:14]: print(r)
+              print("...")
+              for r in rows[-4:]: print(r)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kekka
+          path: kekka.xlsx
