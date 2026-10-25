@@ -1,24 +1,22 @@
 name: Probe
 on: push
+permissions:
+  contents: write
 jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v5
       - run: |
-          curl -sSfL -o kekka.xlsx https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/3kekka/suikei_kekka.xlsx
-          ls -l kekka.xlsx
+          curl -sSfL -o /tmp/kekka.xlsx https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/3kekka/suikei_kekka.xlsx
           pip install openpyxl >/dev/null
           python - <<'PY'
-          import openpyxl
-          b = openpyxl.load_workbook("kekka.xlsx", read_only=True)
-          for s in b.worksheets:
-              rows = list(s.iter_rows(values_only=True))
-              print("SHEET", s.title, len(rows))
-              for r in rows[:14]: print(r)
-              print("...")
-              for r in rows[-4:]: print(r)
+          import openpyxl, csv
+          b = openpyxl.load_workbook("/tmp/kekka.xlsx", read_only=True)
+          with open("probe.csv", "w", newline="") as f:
+              w = csv.writer(f)
+              for r in b.worksheets[0].iter_rows(values_only=True):
+                  w.writerow(r)
           PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: kekka
-          path: kekka.xlsx
+          git config user.name probe && git config user.email probe@example.com
+          git add probe.csv && git commit -m "probe data [skip ci]" && git push
