@@ -1,0 +1,30 @@
+version: 2
+
+models:
+- name: population
+  description: 日本の地域別将来推計人口（令和5年推計）の男女・5歳階級別人口。1行が1地域の1年の男女1区分の1階級。
+  access: public
+  columns:
+  - name: city_code
+    data_tests: [not_null]
+  - name: area_level
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values: [prefecture, designated_city, ward, city, town_village, region]
+  - name: year
+    data_tests:
+    - not_null
+    - accepted_values:
+        arguments:
+          values: [2020, 2025, 2030, 2035, 2040, 2045, 2050]
+          quote: false
+  - name: sex_code
+    data_tests: [not_null]
+  - name: age_class
+    data_tests: [not_null]
+  - name: age_from
+    data_tests: [not_null]
+  - name: population
+    data_tests: [not_null]
