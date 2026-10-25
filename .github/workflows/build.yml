@@ -16,5 +16,5 @@ jobs:
           submodules: true
       - uses: astral-sh/setup-uv@v7
       - run: uv sync
-      - run: uv run python -c "import logging; logging.basicConfig(level=logging.INFO, format='%(message)s'); from pipelines.regional_projection import download_regional_projection; download_regional_projection()"
+      - run: uv run python -c "import main; main.download_regional_projection()"
       - run: uv run dbt build --profiles-dir ci

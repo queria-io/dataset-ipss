@@ -18,14 +18,16 @@ import io
 import logging
 import re
 import unicodedata
-import urllib.request
 from pathlib import Path
 
 import openpyxl
 
+from shared.fetch import fetch, replacing
+
 logger = logging.getLogger("pipelines")
 
 URL = "https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/3kekka/suikei_kekka.xlsx"
+USER_AGENT = "dataset-ipss (+https://github.com/queria-io/dataset-ipss)"
 OUTPUT_DIR = Path("data/ipss")
 
 # 見出しの 1 行目に 総数・男・女 が、2 行目に 計 と 5 歳階級が並ぶ
@@ -55,7 +57,9 @@ def header_columns(top: tuple, sub: tuple) -> dict[str, dict[str, int]]:
 
 def extract(sheet) -> list[dict]:
     rows = [tuple(r) for r in sheet.iter_rows(values_only=True)]
-    head = next(i for i, r in enumerate(rows) if normalize(r[0]) == "コード")
+    head = next((i for i, r in enumerate(rows) if r and normalize(r[0]) == "コード"), None)
+    if head is None:
+        raise SystemExit("見出しの行（コード）が見つからない")
     columns = header_columns(rows[head], rows[head + 1])
     ages = [a for a in columns["総数"] if a != "計"]
     if len(ages) != 20 or any(columns[s].keys() != columns["総数"].keys() for s in SEXES):
@@ -69,12 +73,15 @@ def extract(sheet) -> list[dict]:
         for s in value:
             if value[s]["計"] != sum(value[s][a] for a in ages):
                 raise SystemExit(f"{row[:5]} {s}: 5 歳階級の和が計に合わない")
+        year = re.fullmatch(r"(\d{4})年", normalize(row[4]))
+        if year is None:
+            raise SystemExit(f"{row[:5]}: 年の形が想定と違う")
         base = {
             "code": f"{int(row[0]):05d}",
             "area_kind": normalize(row[1]),
             "prefecture": normalize(row[2]),
             "city": normalize(row[3]),
-            "year": re.fullmatch(r"(\d{4})年", normalize(row[4])).group(1),
+            "year": year.group(1),
         }
         return [
             {**base, "sex": SEXES[s], "age_class": a, "population": value[s][a]}
@@ -86,7 +93,7 @@ def extract(sheet) -> list[dict]:
 
 
 def write_csv(path: Path, rows: list[dict]) -> None:
-    with path.open("w", newline="", encoding="utf-8") as f:
+    with replacing(path) as partial, partial.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=FIELDS)
         writer.writeheader()
         writer.writerows(rows)
@@ -94,8 +101,7 @@ def write_csv(path: Path, rows: list[dict]) -> None:
 
 def download_regional_projection(output_dir: Path = OUTPUT_DIR) -> int:
     logger.info("%s", URL)
-    with urllib.request.urlopen(URL, timeout=120) as response:
-        content = response.read()
+    content = fetch(URL, user_agent=USER_AGENT, timeout=120)
     book = openpyxl.load_workbook(io.BytesIO(content), read_only=True)
     try:
         rows = extract(book.worksheets[0])
