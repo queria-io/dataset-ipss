@@ -1,0 +1,47 @@
+spec_version: "0.1"
+name: ipss
+title: 国立社会保障・人口問題研究所 将来推計人口
+description: |-
+  国立社会保障・人口問題研究所（社人研）が公表する将来推計人口。
+  収録しているのは「日本の地域別将来推計人口（令和5年推計）」の、都道府県・市区町村（政令指定都市は区も）ごとの男女・5歳階級別人口で、2020年から2050年まで5年ごと。2020年は国勢調査の実績値、2025年以降が推計値。
+  福島県の浜通り13市町村（いわき市・相馬市・南相馬市・広野町・楢葉町・富岡町・川内村・大熊町・双葉町・浪江町・葛尾村・新地町・飯舘村）は個別の推計が無く、「浜通り地域」1つにまとめて推計されている。
+
+  出典: 国立社会保障・人口問題研究所「日本の地域別将来推計人口（令和5(2023)年推計）」（https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/t-page.asp）。
+  Queria が結果表（suikei_kekka.xlsx）を、1行が1地域の1年の男女1区分の5歳階級1つの縦持ちの表に変換し、全国地方公共団体コード（検査数字付き6桁）と政令指定都市の区の親の市のコードを付けて作成した。男女計の行と、総人口指数・年齢3区分の割合などの再掲の列は収録していない。
+  社人研のコンテンツは公共データ利用規約（第1.0版）に準拠した利用条件で提供されている。この表は Queria が加工したもので、社人研が作成したものではない。
+keywords:
+  - 将来推計人口
+  - 人口推計
+  - 市区町村
+  - 年齢
+  - 男女
+  - 5歳階級
+  - 人口減少
+  - 高齢化
+  - 社人研
+  - 国立社会保障・人口問題研究所
+homepage: https://github.com/queria-io/dataset-ipss
+language: ja
+themes: [population]
+
+licenses:
+  - JP-PDL-1.0
+
+sources:
+  - title: 国立社会保障・人口問題研究所 日本の地域別将来推計人口（令和5(2023)年推計）
+    path: https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/t-page.asp
+  - title: 国立社会保障・人口問題研究所 サイトご利用にあたって
+    path: https://www.ipss.go.jp/site-ad/link/anlink.html
+
+contributors:
+  - title: 国立社会保障・人口問題研究所
+    path: https://www.ipss.go.jp/
+    roles: [rightsHolder]
+
+spatial_coverage: [JP]
+update_frequency: irregular
+cover: 📉
+
+schemas:
+  - name: regional_projection
+    title: 地域別将来推計人口

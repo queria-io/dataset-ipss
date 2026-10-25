@@ -1,0 +1,20 @@
+name: Sync
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "*.md"
+  # 社人研の地域別推計は5年ごとに出る。定期実行はせず、新しい推計を足すときに手で回す
+  workflow_dispatch:
+
+concurrency:
+  group: sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    uses: queria-io/dataset-shared/.github/workflows/sync.yml@main
+    with:
+      dataset_name: ipss
+    secrets: inherit

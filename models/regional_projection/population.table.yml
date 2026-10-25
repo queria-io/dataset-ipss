@@ -1,0 +1,73 @@
+schema: regional_projection
+name: population
+title: 市区町村別 男女・5歳階級別 将来推計人口
+description: |-
+  日本の地域別将来推計人口（令和5年推計）の、都道府県・市区町村・政令指定都市の区ごとの男女・5歳階級別人口。1行が1地域の1年の男女1区分の5歳階級1つ。
+  年は2020年から2050年まで5年ごと（各年10月1日時点）。2020年は国勢調査の実績値で、2025年以降が推計値（population_flag が A と E）。2020年の年齢不詳は社人研が各階級に按分していて、階級の和は国勢調査の総人口に一致する（全国 126,146,099）。
+  5歳階級は 0~4歳 から 90~94歳 までと、95歳~ の20区分。95歳~ は上の開いた階級で age_to が NULL。男女計の行は無いので、男女計は sex を問わず足す。
+
+  地域は1,951で、都道府県（47）・政令指定都市（20）・政令指定都市の区と東京23区（198）・それ以外の市（769）・町村（916）・浜通り地域（1）が同じ列に縦に並ぶ（area_level）。
+  日本全域をちょうど1回覆うのは area_level = 'prefecture' だけ、または area_level IN ('ward', 'city', 'town_village', 'region') で、絞らずに合計すると何重にも数える。政令指定都市を市で数えるなら 'ward' の代わりに 'designated_city' と東京23区（city_code が 131 で始まる区）を使う。
+  政令指定都市の区の行には、親の市のコードが designated_city_code に入る。市の値は区の和に一致する。
+
+  福島県の浜通り13市町村（いわき市・相馬市・南相馬市・広野町・楢葉町・富岡町・川内村・大熊町・双葉町・浪江町・葛尾村・新地町・飯舘村）は個別の推計が無く、「浜通り地域」1行（city_code = 07999、area_level = 'region'）にまとめてある。07999 は社人研が付けたコードで団体コードではないので、local_government_code は NULL。この13市町村は市区町村の単位では引けない。
+  浜松市は2024年1月の区の再編（7区 → 3区）より前の7区で推計されている。再編後の3区の参考推計は社人研の別の表（sankou1.xlsx）にあり、この表には入れていない。
+  地域コードは2020年10月1日時点のもので、標準地域コード（5桁）の city_code は e_stat の census_municipality などの area と同じ体系。
+
+  出典: 国立社会保障・人口問題研究所「日本の地域別将来推計人口（令和5(2023)年推計）」 結果表 男女・年齢（5歳）階級別の推計結果。Queria が縦持ちに変換して作成した。
+published: true
+primary_key: [city_code, year, sex_code, age_class]
+sources:
+  - path: https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/3kekka/suikei_kekka.xlsx
+fields:
+  - name: city_code
+    title: 市区町村コード（5 桁）
+    description: 標準地域コード（5 桁、検査数字なし、先頭ゼロ保持）。都道府県の行は下3桁が 000（北海道は 01000）。浜通り地域は社人研のコード 07999
+    semantic: { role: entity, name: city }
+  - name: local_government_code
+    title: 全国地方公共団体コード
+    description: 検査数字付き 6 桁。city_code に検査数字を付けたもの。浜通り地域は NULL
+    semantic: { role: entity, name: city }
+  - name: area_level
+    title: 地域の区分
+    description: prefecture（都道府県）、designated_city（政令指定都市）、ward（政令指定都市の区と東京23区）、city（政令指定都市以外の市）、town_village（町村）、region（浜通り地域）
+    semantic: { role: dimension }
+  - name: designated_city_code
+    title: 政令指定都市のコード
+    description: 政令指定都市の区の行だけに入る、親の市の city_code。東京23区とほかの行は NULL
+    semantic: { role: dimension }
+  - name: prefecture
+    title: 都道府県
+    semantic: { role: entity, name: prefecture }
+  - name: city_and_county
+    title: 市区町村
+    description: 政令指定都市の区は市名を含む（札幌市中央区）。都道府県の行は NULL
+  - name: year
+    title: 年
+    description: 各年10月1日時点
+  - name: sex_code
+    title: 性別コード
+    description: ISO 5218 の 1（男）・2（女）
+    semantic: { role: dimension }
+  - name: sex
+    title: 性別
+    description: 男・女
+    semantic: { role: dimension }
+  - name: age_class
+    title: 年齢階級
+    description: 0~4歳 から 90~94歳 までの5歳階級と、95歳~
+    semantic: { role: dimension }
+  - name: age_from
+    title: 年齢階級の下限
+    description: 歳
+  - name: age_to
+    title: 年齢階級の上限
+    description: 歳（その歳を含む）。95歳~ は NULL
+  - name: population
+    title: 人口
+    description: 人
+    semantic: { role: measure, agg: sum }
+  - name: population_flag
+    title: 人口の状態
+    description: SDMX の観測ステータス。A は国勢調査の実績値（2020年）、E は推計値（2025年以降）
+    semantic: { role: dimension }
