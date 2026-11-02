@@ -1,6 +1,6 @@
 # この dataset.yml は fdl commit が読む（FDL の dataset.json を YAML で書いたもの）。
 # 表の説明は models/ の *.table.yml に書く。表と列の型・NULL・行数は fdl commit がカタログから埋める。
-# Queria だけの項目（テーマ・カバー・列の意味）は extensions.queria に書く。
+# Queria だけの項目（テーマ・カバー・列の意味）は annotations.queria に書く。
 name: ipss
 title: 国立社会保障・人口問題研究所 将来推計人口
 description: |-
@@ -46,7 +46,7 @@ schemas:
   - name: regional_projection
     title: 地域別将来推計人口
 
-extensions:
+annotations:
   queria:
     themes: [population]
     cover: 📉
