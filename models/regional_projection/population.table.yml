@@ -22,22 +22,22 @@ fields:
   - name: city_code
     title: 市区町村コード（5 桁）
     description: 標準地域コード（5 桁、検査数字なし、先頭ゼロ保持）。都道府県の行は下3桁が 000（北海道は 01000）。浜通り地域は社人研のコード 07999
-    extensions: { queria: { semantic: { role: entity, name: city } } }
+    annotations: { queria: { semantic: { role: entity, name: city } } }
   - name: local_government_code
     title: 全国地方公共団体コード
     description: 検査数字付き 6 桁。city_code に検査数字を付けたもの。浜通り地域は NULL
-    extensions: { queria: { semantic: { role: entity, name: city } } }
+    annotations: { queria: { semantic: { role: entity, name: city } } }
   - name: area_level
     title: 地域の区分
     description: prefecture（都道府県）、designated_city（政令指定都市）、ward（政令指定都市の区と東京23区）、city（政令指定都市以外の市）、town_village（町村）、region（浜通り地域）
-    extensions: { queria: { semantic: { role: dimension } } }
+    annotations: { queria: { semantic: { role: dimension } } }
   - name: designated_city_code
     title: 政令指定都市のコード
     description: 政令指定都市の区の行だけに入る、親の市の city_code。東京23区とほかの行は NULL
-    extensions: { queria: { semantic: { role: dimension } } }
+    annotations: { queria: { semantic: { role: dimension } } }
   - name: prefecture
     title: 都道府県
-    extensions: { queria: { semantic: { role: entity, name: prefecture } } }
+    annotations: { queria: { semantic: { role: entity, name: prefecture } } }
   - name: city_and_county
     title: 市区町村
     description: 政令指定都市の区は市名を含む（札幌市中央区）。都道府県の行は NULL
@@ -47,15 +47,15 @@ fields:
   - name: sex_code
     title: 性別コード
     description: ISO 5218 の 1（男）・2（女）
-    extensions: { queria: { semantic: { role: dimension } } }
+    annotations: { queria: { semantic: { role: dimension } } }
   - name: sex
     title: 性別
     description: 男・女
-    extensions: { queria: { semantic: { role: dimension } } }
+    annotations: { queria: { semantic: { role: dimension } } }
   - name: age_class
     title: 年齢階級
     description: 0~4歳 から 90~94歳 までの5歳階級と、95歳~
-    extensions: { queria: { semantic: { role: dimension } } }
+    annotations: { queria: { semantic: { role: dimension } } }
   - name: age_from
     title: 年齢階級の下限
     description: 歳
@@ -65,8 +65,8 @@ fields:
   - name: population
     title: 人口
     description: 人
-    extensions: { queria: { semantic: { role: measure, agg: sum } } }
+    annotations: { queria: { semantic: { role: measure, agg: sum } } }
   - name: population_flag
     title: 人口の状態
     description: SDMX の観測ステータス。A は国勢調査の実績値（2020年）、E は推計値（2025年以降）
-    extensions: { queria: { semantic: { role: dimension } } }
+    annotations: { queria: { semantic: { role: dimension } } }
