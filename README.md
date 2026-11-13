@@ -51,7 +51,7 @@ ORDER BY year;
 ```bash
 git submodule update --init
 uv sync
-scripts/build.sh   # queria sync -- python main.py
+scripts/build.sh   # fdl checkout → python main.py → fdl commit
 ```
 
 推計は 5 年ごとに出るため、定期実行はしません。main への push と手動の実行（workflow_dispatch）で Sync が実行されます。
