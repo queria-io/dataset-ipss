@@ -3,7 +3,7 @@
 
 with long as (
     unpivot (
-        select city_code, area_level, prefecture, city_and_county, year, columns('^(男|女)/[0-9]')
+        select city_code, area_level, prefecture, city_and_county, year, source_sha256, source_sheet, source_row, columns('^(男|女)/[0-9]')
         from {{ ref('stg_population') }}
     )
     on columns('^(男|女)/[0-9]')
@@ -20,7 +20,10 @@ typed as (
         case split_part(label, '/', 1) when '男' then '1' when '女' then '2' end as sex_code,
         split_part(label, '/', 1) as sex,
         replace(split_part(label, '/', 2), '～', '~') as age_class,
-        population
+        population,
+        source_sha256,
+        source_sheet,
+        source_row
     from long
 ),
 
@@ -56,6 +59,9 @@ select
     cast(nullif(regexp_extract(age_class, '~([0-9]+)歳$', 1), '') as integer) as age_to,
     population,
     -- 2020年は国勢調査の実績値、2025年以降が推計値
-    case when year = 2020 then 'A' else 'E' end as population_flag
+    case when year = 2020 then 'A' else 'E' end as population_flag,
+    source_sha256,
+    source_sheet,
+    source_row
 from typed
 left join ward_parents using (city_code)

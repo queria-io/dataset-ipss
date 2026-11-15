@@ -14,5 +14,8 @@ select
     trim("都道府県") as prefecture,
     nullif(trim("市区町村"), '') as city_and_county,
     cast(regexp_extract(trim("年"), '^([0-9]{4})年$', 1) as integer) as year,
-    cast(columns('^(総数|男|女)/') as integer)
+    cast(columns('^(総数|男|女)/') as integer),
+    source_sha256,
+    source_sheet,
+    cast(source_row as integer) as source_row
 from {{ ref('raw_population') }}
