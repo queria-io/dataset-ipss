@@ -3,8 +3,6 @@ name: Apply
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "*.md"
   # 社人研の地域別推計は5年ごとに出る。定期実行はせず、新しい推計を足すときに手で回す
   workflow_dispatch:
 
@@ -20,7 +18,7 @@ jobs:
       contents: write
       pull-requests: write
       id-token: write
-    uses: queria-io/dataset-shared/.github/workflows/sync.yml@1e4fb6e5ce0612781bcd51f0575048c49cd591ec
+    uses: queria-io/dataset-shared/.github/workflows/sync.yml@0f4bd15bc89d46b3da17f042650ab738fcb80cfb
     with:
       dataset_name: ipss
     secrets:
