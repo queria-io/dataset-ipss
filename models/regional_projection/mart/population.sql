@@ -1,32 +1,27 @@
 {# 日本の地域別将来推計人口（令和5年推計）の男女・5歳階級別人口。1行が1地域の1年の男女1区分の1階級。
-   pipelines/regional_projection.py が suikei_kekka.xlsx から data/ipss/population.csv に書き出す。 #}
+   総数は男と女の和なので、男と女の 5 歳階級の列だけを縦持ちにする。 #}
 
-with source as (
-    select *
-    from read_csv('data/ipss/population.csv', header = true, all_varchar = true)
+with long as (
+    unpivot (
+        select city_code, area_level, prefecture, city_and_county, year, columns('^(男|女)/[0-9]')
+        from {{ ref('stg_population') }}
+    )
+    on columns('^(男|女)/[0-9]')
+    into name label value population
 ),
 
 typed as (
     select
-        code as city_code,
-        case area_kind
-            when 'a' then 'prefecture'
-            when '0' then 'ward'
-            when '1' then 'designated_city'
-            when '2' then 'city'
-            when '3' then 'town_village'
-            when '9' then 'region'
-        end as area_level,
+        city_code,
+        area_level,
         prefecture,
-        nullif(city, '') as city_and_county,
-        cast(year as integer) as year,
-        case sex when 'male' then '1' when 'female' then '2' end as sex_code,
-        case sex when 'male' then '男' when 'female' then '女' end as sex,
-        age_class,
-        cast(regexp_extract(age_class, '^([0-9]+)', 1) as integer) as age_from,
-        cast(nullif(regexp_extract(age_class, '~([0-9]+)歳$', 1), '') as integer) as age_to,
-        cast(population as integer) as population
-    from source
+        city_and_county,
+        year,
+        case split_part(label, '/', 1) when '男' then '1' when '女' then '2' end as sex_code,
+        split_part(label, '/', 1) as sex,
+        replace(split_part(label, '/', 2), '～', '~') as age_class,
+        population
+    from long
 ),
 
 designated_cities as (
@@ -57,8 +52,8 @@ select
     sex_code,
     sex,
     age_class,
-    age_from,
-    age_to,
+    cast(regexp_extract(age_class, '^([0-9]+)', 1) as integer) as age_from,
+    cast(nullif(regexp_extract(age_class, '~([0-9]+)歳$', 1), '') as integer) as age_to,
     population,
     -- 2020年は国勢調査の実績値、2025年以降が推計値
     case when year = 2020 then 'A' else 'E' end as population_flag

@@ -1,11 +1,9 @@
-"""国立社会保障・人口問題研究所「日本の地域別将来推計人口（令和5年推計）」を取り出す。
+"""国立社会保障・人口問題研究所「日本の地域別将来推計人口（令和5年推計）」を取得する。
 
 結果表 suikei_kekka.xlsx（全国の都道府県・市区町村をまとめた 1 シート）を、
-1 行 = 1 地域 × 1 年 × 男女 × 5 歳階級の CSV にする。
-
-原典の行は 1 地域 × 1 年で、列に 総数・男・女 のそれぞれ 計 と 5 歳階級 20 区分が並ぶ。
-総数は男と女の和なので男と女だけを残し、取り出すときに 男 + 女 = 総数、
-5 歳階級の和 = 計 になっていることを確かめる。
+原典の行と列のまま CSV にする。見出しは 2 行（1 行目に 総数・男・女、2 行目に 計 と
+5 歳階級）なので、列名を「総数/計」「男/0～4歳」のように 1 行にまとめる。
+値の加工（縦持ちへの変換、型付け、コードの変換）は dbt で行う。
 
 出力: data/ipss/population.csv
 
@@ -16,8 +14,6 @@ https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/t-page.asp
 import csv
 import io
 import logging
-import re
-import unicodedata
 from pathlib import Path
 
 import openpyxl
@@ -30,72 +26,38 @@ URL = "https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/3kekka/suikei_kekka.xls
 USER_AGENT = "dataset-ipss (+https://github.com/queria-io/dataset-ipss)"
 OUTPUT_DIR = Path("data/ipss")
 
-# 見出しの 1 行目に 総数・男・女 が、2 行目に 計 と 5 歳階級が並ぶ
-SEXES = {"男": "male", "女": "female"}
-FIELDS = ["code", "area_kind", "prefecture", "city", "year", "sex", "age_class", "population"]
+
+def label(value) -> str | None:
+    return None if value is None else "".join(str(value).split())
 
 
-def normalize(value) -> str:
-    return unicodedata.normalize("NFKC", "" if value is None else str(value)).strip()
+def column_names(top: tuple, sub: tuple) -> list[str | None]:
+    """2 行の見出しを 1 行の列名にする。見出しの無い列は None。"""
+
+    def name(i: int) -> str | None:
+        block = next((label(top[j]) for j in range(i, -1, -1) if top[j] is not None), None)
+        if top[i] is None and sub[i] is None:
+            return None
+        return block if sub[i] is None else f"{block}/{label(sub[i])}"
+
+    return [name(i) for i in range(len(top))]
 
 
-def header_columns(top: tuple, sub: tuple) -> dict[str, dict[str, int]]:
-    """{'総数' | '男' | '女': {'計' | '0~4歳' | ...: 列番号}}。"""
-    starts = [(i, normalize(c)) for i, c in enumerate(top) if normalize(c) in ("総数", *SEXES)]
-
-    def block(i: int) -> dict[str, int]:
-        labels = []
-        for j in range(i, len(sub)):
-            label = normalize(sub[j])
-            if not label or (labels and label == "計"):
-                break
-            labels.append((label, j))
-        return dict(labels)
-
-    return {name: block(i) for i, name in starts}
-
-
-def extract(sheet) -> list[dict]:
+def extract(sheet) -> tuple[list[str], list[list]]:
     rows = [tuple(r) for r in sheet.iter_rows(values_only=True)]
-    head = next((i for i, r in enumerate(rows) if r and normalize(r[0]) == "コード"), None)
+    head = next((i for i, r in enumerate(rows) if r and label(r[0]) == "コード"), None)
     if head is None:
         raise SystemExit("見出しの行（コード）が見つからない")
-    columns = header_columns(rows[head], rows[head + 1])
-    ages = [a for a in columns["総数"] if a != "計"]
-    if len(ages) != 20 or any(columns[s].keys() != columns["総数"].keys() for s in SEXES):
-        raise SystemExit(f"見出しの形が想定と違う: {columns}")
-
-    def one(row) -> list[dict]:
-        value = {s: {a: row[j] for a, j in columns[s].items()} for s in ("総数", *SEXES)}
-        for a in columns["総数"]:
-            if value["総数"][a] != sum(value[s][a] for s in SEXES):
-                raise SystemExit(f"{row[:5]} {a}: 男 + 女 が総数に合わない")
-        for s in value:
-            if value[s]["計"] != sum(value[s][a] for a in ages):
-                raise SystemExit(f"{row[:5]} {s}: 5 歳階級の和が計に合わない")
-        year = re.fullmatch(r"(\d{4})年", normalize(row[4]))
-        if year is None:
-            raise SystemExit(f"{row[:5]}: 年の形が想定と違う")
-        base = {
-            "code": f"{int(row[0]):05d}",
-            "area_kind": normalize(row[1]),
-            "prefecture": normalize(row[2]),
-            "city": normalize(row[3]),
-            "year": year.group(1),
-        }
-        return [
-            {**base, "sex": SEXES[s], "age_class": a, "population": value[s][a]}
-            for s in SEXES
-            for a in ages
-        ]
-
-    return [r for row in rows[head + 2:] if row[0] is not None for r in one(row)]
+    names = column_names(rows[head], rows[head + 1])
+    keep = [i for i, n in enumerate(names) if n is not None]
+    body = [r for r in rows[head + 2:] if any(c is not None for c in r)]
+    return [names[i] for i in keep], [[r[i] for i in keep] for r in body]
 
 
-def write_csv(path: Path, rows: list[dict]) -> None:
+def write_csv(path: Path, header: list[str], rows: list[list]) -> None:
     with replacing(path) as partial, partial.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDS)
-        writer.writeheader()
+        writer = csv.writer(f)
+        writer.writerow(header)
         writer.writerows(rows)
 
 
@@ -104,12 +66,12 @@ def download_regional_projection(output_dir: Path = OUTPUT_DIR) -> int:
     content = fetch(URL, user_agent=USER_AGENT, timeout=120)
     book = openpyxl.load_workbook(io.BytesIO(content), read_only=True)
     try:
-        rows = extract(book.worksheets[0])
+        header, rows = extract(book.worksheets[0])
     finally:
         book.close()
     if not rows:
         raise SystemExit(f"{URL}: 1 行も取れなかった（Excel の形が変わった？）")
     output_dir.mkdir(parents=True, exist_ok=True)
-    write_csv(output_dir / "population.csv", rows)
+    write_csv(output_dir / "population.csv", header, rows)
     logger.info("  population: %d 行", len(rows))
     return len(rows)
