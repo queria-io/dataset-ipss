@@ -3,8 +3,6 @@ name: Apply
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "*.md"
   # 社人研の地域別推計は5年ごとに出る。定期実行はせず、新しい推計を足すときに手で回す
   workflow_dispatch:
 
