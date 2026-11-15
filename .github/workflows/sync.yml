@@ -18,7 +18,7 @@ jobs:
       contents: write
       pull-requests: write
       id-token: write
-    uses: queria-io/dataset-shared/.github/workflows/sync.yml@0f4bd15bc89d46b3da17f042650ab738fcb80cfb
+    uses: queria-io/dataset-shared/.github/workflows/sync.yml@252f25b5f027b83c61e265125e7557259135e8e7
     with:
       dataset_name: ipss
     secrets:
