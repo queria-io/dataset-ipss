@@ -1,5 +1,6 @@
-schema: regional_projection
-name: population
+---
+$schema: https://queria.io/schemas/table/v1.json
+table: regional_projection.population
 title: 市区町村別 男女・5歳階級別 将来推計人口
 description: |-
   都道府県・市区町村ごとの男女・5 歳階級別の将来推計人口です。1 行が 1 地域の 1 年の男女 1 区分の 5 歳階級 1 つです。
@@ -14,22 +15,22 @@ fields:
   - name: city_code
     title: 市区町村コード（5 桁）
     description: 標準地域コード（5 桁）。都道府県は下 3 桁が 000、浜通り地域は 07999
-    annotations: { queria: { semantic: { role: entity, name: city } } }
+    semantic: {role: entity, name: city}
   - name: local_government_code
     title: 全国地方公共団体コード
     description: 検査数字付き 6 桁。浜通り地域は NULL
-    annotations: { queria: { semantic: { role: entity, name: city } } }
+    semantic: {role: entity, name: city}
   - name: area_level
     title: 地域の区分
     description: prefecture・designated_city・ward・city・town_village・region
-    annotations: { queria: { semantic: { role: dimension } } }
+    semantic: {role: dimension}
   - name: designated_city_code
     title: 政令指定都市のコード
     description: 政令指定都市の区の行だけに入る、親の市の city_code
-    annotations: { queria: { semantic: { role: dimension } } }
+    semantic: {role: dimension}
   - name: prefecture
     title: 都道府県
-    annotations: { queria: { semantic: { role: entity, name: prefecture } } }
+    semantic: {role: entity, name: prefecture}
   - name: city_and_county
     title: 市区町村
     description: 区は市名を含みます（札幌市中央区）。都道府県の行は NULL
@@ -39,15 +40,15 @@ fields:
   - name: sex_code
     title: 性別コード
     description: ISO 5218 の 1（男）・2（女）
-    annotations: { queria: { semantic: { role: dimension } } }
+    semantic: {role: dimension}
   - name: sex
     title: 性別
     description: 男・女
-    annotations: { queria: { semantic: { role: dimension } } }
+    semantic: {role: dimension}
   - name: age_class
     title: 年齢階級
     description: 0~4歳 から 90~94歳 までの 5 歳階級と 95歳~
-    annotations: { queria: { semantic: { role: dimension } } }
+    semantic: {role: dimension}
   - name: age_from
     title: 年齢階級の下限
     description: 歳
@@ -57,8 +58,9 @@ fields:
   - name: population
     title: 人口
     description: 人
-    annotations: { queria: { semantic: { role: measure, agg: sum } } }
+    semantic: {role: measure, agg: sum}
   - name: population_flag
     title: 人口の状態
     description: A は国勢調査の実績値（2020 年）、E は推計値
-    annotations: { queria: { semantic: { role: dimension } } }
+    semantic: {role: dimension}
+---
