@@ -1,0 +1,33 @@
+---
+$schema: https://queria.io/schemas/table/v1.json
+table: regional_projection.source_file
+title: 元のファイル
+description: |-
+  population を作った元のファイル（結果表 suikei_kekka.xlsx）の一覧です。1 行が 1 つのファイルで、取得した URL・掲載ページ・取得日時と、ファイルの sha256 を持ちます。
+
+  - population の source_sha256 がこのテーブルの sha256 を指します
+  - ファイル本体は保存していません。url から取得できます
+primary_key: [sha256]
+sources:
+  - path: https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/t-page.asp
+fields:
+  - name: url
+    title: ファイルの URL
+  - name: page_url
+    title: 掲載ページの URL
+  - name: sha256
+    title: ファイルの sha256
+  - name: bytes
+    title: バイト数
+  - name: media_type
+    title: メディアタイプ
+  - name: retrieved_at
+    title: 取得した日時
+    description: UTC
+  - name: etag
+    title: ETag
+    description: 取得したときの応答の ETag ヘッダー。無ければ NULL
+  - name: last_modified
+    title: Last-Modified
+    description: 取得したときの応答の Last-Modified ヘッダー。無ければ NULL
+---
