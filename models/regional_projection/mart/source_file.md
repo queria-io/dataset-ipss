@@ -1,5 +1,6 @@
-schema: regional_projection
-name: source_file
+---
+$schema: https://queria.io/schemas/table/v1.json
+table: regional_projection.source_file
 title: 元のファイル
 description: |-
   population を作った元のファイル（結果表 suikei_kekka.xlsx）の一覧です。1 行が 1 つのファイルで、取得した URL・掲載ページ・取得日時と、ファイルの sha256 を持ちます。
@@ -29,3 +30,4 @@ fields:
   - name: last_modified
     title: Last-Modified
     description: 取得したときの応答の Last-Modified ヘッダー。無ければ NULL
+---
