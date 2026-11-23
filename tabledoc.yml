@@ -40,4 +40,3 @@ update_frequency: irregular
 schemas:
   - name: regional_projection
     title: 地域別将来推計人口
-
