@@ -12,13 +12,11 @@ concurrency:
 
 jobs:
   sync:
-    # Queria への書き込みは GitHub Actions の OIDC で 1 時間のトークンを取って行う。
-    # contents と pull-requests は、Queria で変更された説明をこのリポジトリに戻す PR に使う
+    # Queria への書き込みは GitHub Actions の OIDC で 1 時間のトークンを取って行う
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
       id-token: write
-    uses: queria-io/dataset-shared/.github/workflows/sync.yml@03f0facbec0d7795c3b95cbcacedc1d26e500591
+    uses: queria-io/dataset-shared/.github/workflows/sync.yml@c146191a4b8515eff9174cf9856e86365e46bc56
     with:
       dataset_name: ipss
     secrets:

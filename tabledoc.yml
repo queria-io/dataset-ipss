@@ -1,11 +1,11 @@
-$schema: https://queria.io/schemas/dataset/v1.json
+$schema: https://tabledoc.queria.io/schemas/dataset/v1.json
 name: ipss
 title: 国立社会保障・人口問題研究所 将来推計人口
 description: |-
   国立社会保障・人口問題研究所（社人研）の「日本の地域別将来推計人口（令和5年推計）」です。都道府県・市区町村ごとの男女・5 歳階級別人口を、2020 年から 2050 年まで 5 年ごとに収録しています。
 
   出典：国立社会保障・人口問題研究所「日本の地域別将来推計人口（令和5(2023)年推計）」。Queria が加工したものです。
-keywords:
+topics:
   - 将来推計人口
   - 人口推計
   - 市区町村
@@ -22,13 +22,16 @@ licenses:
   - JP-PDL-1.0
 
 sources:
-  - title: 国立社会保障・人口問題研究所 日本の地域別将来推計人口（令和5(2023)年推計）
+  - id: t-page
+    title: 国立社会保障・人口問題研究所 日本の地域別将来推計人口（令和5(2023)年推計）
     path: https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/t-page.asp
-  - title: 国立社会保障・人口問題研究所 サイトご利用にあたって
+  - id: anlink
+    title: 国立社会保障・人口問題研究所 サイトご利用にあたって
     path: https://www.ipss.go.jp/site-ad/link/anlink.html
 
 contributors:
-  - title: 国立社会保障・人口問題研究所
+  - id: ipss
+    title: 国立社会保障・人口問題研究所
     path: https://www.ipss.go.jp/
     roles: [rightsHolder]
 
@@ -37,6 +40,3 @@ update_frequency: irregular
 schemas:
   - name: regional_projection
     title: 地域別将来推計人口
-
-themes: [population]
-cover: 📉
