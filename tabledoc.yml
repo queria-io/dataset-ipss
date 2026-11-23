@@ -25,15 +25,15 @@ licenses:
 sources:
   - id: t-page
     title: 国立社会保障・人口問題研究所 日本の地域別将来推計人口（令和5(2023)年推計）
-    path: https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/t-page.asp
+    url: https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/t-page.asp
   - id: anlink
     title: 国立社会保障・人口問題研究所 サイトご利用にあたって
-    path: https://www.ipss.go.jp/site-ad/link/anlink.html
+    url: https://www.ipss.go.jp/site-ad/link/anlink.html
 
 contributors:
   - id: ipss
     title: 国立社会保障・人口問題研究所
-    path: https://www.ipss.go.jp/
+    url: https://www.ipss.go.jp/
     roles: [rightsHolder]
 
 spatial_coverage: [JP]
