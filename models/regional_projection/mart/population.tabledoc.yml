@@ -26,6 +26,7 @@ columns:
   - name: designated_city_code
     title: 政令指定都市のコード
     description: 政令指定都市の区の行だけに入る、親の市の city_code
+    entity: city
   - name: prefecture
     title: 都道府県
     entity: prefecture
